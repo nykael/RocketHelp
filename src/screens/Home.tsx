@@ -11,13 +11,24 @@ import { Order, OrderProps } from "../components/Order";
 
 export function Home() {
     const [statusSelected, setStatusSelected] = useState<'open' | 'closed'>('open')
-    const [orders, setOrders] = useState<OrderProps[]>([])
+    const [orders, setOrders] = useState<OrderProps[]>([
+      {
+        id: '123',
+        patrimony: '123456',
+        when: '18/07/2022 às 14:00',
+        status: 'open'
+      }
+    ])
     
     const navigation = useNavigation()
     const {colors} = useTheme()
     
     function handleNewOrder() {
       navigation.navigate('new')
+    }
+
+    function handleOpenDetails(orderId: string){
+      navigation.navigate('details', {orderId})
     }
 
     return (
@@ -73,7 +84,7 @@ export function Home() {
               <FlatList 
                  data={orders}
                  keyExtractor={(item) => item.id}
-                 renderItem={({item}) => <Order data={item} />}
+                 renderItem={({item}) => <Order data={item} onPress={() => handleOpenDetails(item.id)} />}
                  showsVerticalScrollIndicator={false}
                  contentContainerStyle={{paddingBottom: 100}}
                  ListEmptyComponent={() => (
