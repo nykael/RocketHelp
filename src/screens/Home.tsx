@@ -17,7 +17,7 @@ export function Home() {
         patrimony: '123456',
         when: '18/07/2022 às 14:00',
         status: 'open'
-      }
+      },  
     ])
     
     const navigation = useNavigation()
@@ -62,7 +62,7 @@ export function Home() {
                 </Heading>
 
                 <Text color="gray.200">
-                    3
+                    {orders.length}
                 </Text>
               </HStack>
 
