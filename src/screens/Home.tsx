@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {useNavigation} from '@react-navigation/native'
+import firestore  from '@react-native-firebase/firestore'
 import { Center, FlatList, HStack, Heading, IconButton, Text, VStack, useTheme } from "native-base";
 import {SignOut} from 'phosphor-react-native'
 import {ChatTeardropText} from 'phosphor-react-native'
@@ -10,17 +11,13 @@ import Logo from '../assets/LogoS.svg'
 import { Filter } from "../components/Filter";
 import { Button } from "../components/Button";
 import { Order, OrderProps } from "../components/Order";
+import { dateFormat } from "../utils/firestoreDateFormat";
+import { Loading } from "../components/Loading";
 
 export function Home() {
     const [statusSelected, setStatusSelected] = useState<'open' | 'closed'>('open')
-    const [orders, setOrders] = useState<OrderProps[]>([
-      {
-        id: '123',
-        patrimony: '123456',
-        when: '18/07/2022 às 14:00',
-        status: 'open'
-      },  
-    ])
+    const [loading, setIsLoading] = useState(true)
+    const [orders, setOrders] = useState<OrderProps[]>([])
     
     const navigation = useNavigation()
     const {colors} = useTheme()
@@ -41,6 +38,32 @@ export function Home() {
         return Alert.alert('Sair', 'Não foi possívle sair.')
       })
     }
+
+    useEffect(() => {
+       setIsLoading(true)
+
+       const subscriber =  firestore()
+       .collection('orders')
+       .where('status', '==', statusSelected )
+       .onSnapshot(snapshot => {
+        const data = snapshot.docs.map(doc => {
+          const { patrimony, description, status, created_at } = doc.data();
+
+
+          return {
+            id: doc.id,
+            patrimony,
+            description,
+            status,
+            when: dateFormat(created_at)
+          }
+        });
+        setOrders(data)
+        setIsLoading(false)
+       })
+
+       return subscriber
+    },[statusSelected])
 
     return (
         <VStack flex={1} pb={6} bg="gray.700">
@@ -93,7 +116,9 @@ export function Home() {
                 />
               </HStack>
 
-              <FlatList 
+          { loading ? <Loading />
+             :
+           <FlatList 
                  data={orders}
                  keyExtractor={(item) => item.id}
                  renderItem={({item}) => <Order data={item} onPress={() => handleOpenDetails(item.id)} />}
@@ -110,6 +135,7 @@ export function Home() {
                   </Center>
                  )}
               />
+            }
 
               <Button title="Nova solicitação" onPress={handleNewOrder}/>
             </VStack>

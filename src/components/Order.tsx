@@ -4,6 +4,7 @@ import {ClockAfternoon, Hourglass, CircleWavyCheck} from 'phosphor-react-native'
 export interface OrderProps {
     id: string;
     patrimony: string;
+    description: string;
     when:string;
     status: 'open' | 'closed'
 }
